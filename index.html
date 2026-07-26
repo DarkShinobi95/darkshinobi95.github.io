@@ -39,28 +39,30 @@
       background: rgba(0, 0, 0, 0.85);
       border: 1px solid #00ff66;
       border-radius: 16px;
-      padding: 30px 20px;
+      padding: 25px 20px;
       width: 90%;
-      max-width: 360px;
+      max-width: 380px;
       text-align: center;
       box-shadow: 0 0 20px rgba(0, 255, 102, 0.25);
       backdrop-filter: blur(5px);
+      max-height: 95vh;
+      overflow-y: auto;
     }
 
     /* Аватар */
     .avatar {
-      width: 90px;
-      height: 90px;
+      width: 80px;
+      height: 80px;
       border-radius: 50%;
       border: 2px solid #00ff66;
-      margin: 0 auto 15px auto;
+      margin: 0 auto 12px auto;
       box-shadow: 0 0 10px #00ff66;
       object-fit: cover;
     }
 
     /* Заголовок / Домен */
     h1 {
-      font-size: 22px;
+      font-size: 20px;
       letter-spacing: 2px;
       text-shadow: 0 0 8px #00ff66;
       margin-bottom: 5px;
@@ -68,9 +70,9 @@
 
     /* Описание / Подзаголовок */
     .bio {
-      font-size: 13px;
+      font-size: 12px;
       color: rgba(0, 255, 102, 0.8);
-      margin-bottom: 20px;
+      margin-bottom: 15px;
       line-height: 1.4;
     }
 
@@ -78,18 +80,18 @@
     .links {
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 10px;
     }
 
     .btn {
       display: block;
-      padding: 12px;
+      padding: 10px;
       border: 1px solid #00ff66;
       border-radius: 8px;
       color: #00ff66;
       text-decoration: none;
       font-weight: bold;
-      font-size: 14px;
+      font-size: 13px;
       transition: all 0.2s ease;
       background: transparent;
       cursor: pointer;
@@ -105,7 +107,69 @@
     .wallet-btn {
       font-size: 11px;
       opacity: 0.8;
+    }
+
+    /* СТИЛИ МИНИ-ИГРЫ */
+    .game-btn {
+      border-color: #00e5ff;
+      color: #00e5ff;
       margin-top: 5px;
+    }
+    .game-btn:hover {
+      background: #00e5ff;
+      color: #000;
+      box-shadow: 0 0 15px #00e5ff;
+    }
+
+    #game-box {
+      display: none;
+      margin-top: 15px;
+      border: 1px dashed #00ff66;
+      border-radius: 8px;
+      padding: 12px;
+      background: rgba(0, 20, 0, 0.6);
+      text-align: left;
+    }
+
+    .game-title {
+      font-size: 12px;
+      text-align: center;
+      margin-bottom: 8px;
+      color: #00e5ff;
+      font-weight: bold;
+    }
+
+    #game-log {
+      height: 90px;
+      overflow-y: auto;
+      font-size: 10px;
+      border: 1px solid rgba(0, 255, 102, 0.3);
+      padding: 5px;
+      margin-bottom: 8px;
+      background: #000;
+    }
+
+    .game-controls {
+      display: flex;
+      gap: 5px;
+    }
+
+    #game-input {
+      flex: 1;
+      background: #000;
+      border: 1px solid #00ff66;
+      color: #00ff66;
+      padding: 6px;
+      font-family: inherit;
+      font-size: 12px;
+      text-transform: uppercase;
+      border-radius: 4px;
+    }
+
+    .game-submit {
+      padding: 6px 10px;
+      font-size: 11px;
+      border-radius: 4px;
     }
   </style>
 </head>
@@ -114,7 +178,6 @@
   <canvas id="matrix"></canvas>
 
   <div class="card">
-    <!-- Фото или заглушка -->
     <img src="/logo.jpg" alt="Avatar" class="avatar">
     
     <h1>DarkShinobi.ton</h1>
@@ -124,6 +187,19 @@
       <a href="https://t.me/darkshinobi_95" target="_blank" class="btn">💬 TELEGRAM</a>
       <a href="https://t.me/ton_adept" target="_blank" class="btn">💬 Канал</a>
       <button class="btn wallet-btn" onclick="copyWallet()">📋 COPY TON ADDRESS</button>
+      
+      <!-- Кнопка запуска игры -->
+      <button class="btn game-btn" onclick="toggleGame()">🕹️ HACK SYSTEM</button>
+    </div>
+
+    <!-- Блок мини-игры -->
+    <div id="game-box">
+      <div class="game-title">> HACK_TERMINAL v1.0</div>
+      <div id="game-log">Нажмите START, чтобы взломать...</div>
+      <div class="game-controls">
+        <input type="text" id="game-input" maxlength="4" placeholder="4 HEX" disabled>
+        <button class="btn game-submit" id="game-action-btn" onclick="handleGameAction()">START</button>
+      </div>
     </div>
   </div>
 
@@ -170,6 +246,87 @@
       const address = "UQDh_0Uk5b-omEv6G3g7jDAItuuwBDEabR8VlqAdBslZvLMj"; 
       navigator.clipboard.writeText(address);
       alert("TON адрес скопирован!");
+    }
+
+    // ЛОГИКА МИНИ-ИГРЫ
+    let secretCode = "";
+    let attempts = 0;
+    const maxAttempts = 6;
+    let isPlaying = false;
+
+    function toggleGame() {
+      const box = document.getElementById('game-box');
+      box.style.display = box.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function logMessage(msg) {
+      const log = document.getElementById('game-log');
+      log.innerHTML += `<div>${msg}</div>`;
+      log.scrollTop = log.scrollHeight;
+    }
+
+    function generateCode() {
+      const hexChars = "0123456789ABCDEF";
+      let code = "";
+      while(code.length < 4) {
+        let char = hexChars[Math.floor(Math.random() * hexChars.length)];
+        if (!code.includes(char)) code += char;
+      }
+      return code;
+    }
+
+    function handleGameAction() {
+      const actionBtn = document.getElementById('game-action-btn');
+      const input = document.getElementById('game-input');
+
+      if (!isPlaying) {
+        // Старт игры
+        secretCode = generateCode();
+        attempts = 0;
+        isPlaying = true;
+        document.getElementById('game-log').innerHTML = "<div>[SYS]: Код сгенерирован (4 HEX).</div><div>У вас 6 попыток. Угадайте!</div>";
+        input.disabled = false;
+        input.value = "";
+        input.focus();
+        actionBtn.innerText = "SUBMIT";
+      } else {
+        // Проверка ввода
+        let val = input.value.toUpperCase().trim();
+        if (val.length !== 4) {
+          logMessage("<span style='color:yellow'>[ERR]: Введите 4 символа!</span>");
+          return;
+        }
+
+        attempts++;
+        let exact = 0;
+        let partial = 0;
+
+        for (let i = 0; i < 4; i++) {
+          if (val[i] === secretCode[i]) {
+            exact++;
+          } else if (secretCode.includes(val[i])) {
+            partial++;
+          }
+        }
+
+        logMessage(`> ${val} | Точно: ${exact}, Совпало: ${partial}`);
+
+        if (exact === 4) {
+          logMessage("<span style='color:#00ff66'>[SUCCESS]: ДОСТУП РАЗРЕШЁН! SYSTEM HACKED!</span>");
+          endGame();
+        } else if (attempts >= maxAttempts) {
+          logMessage(`<span style='color:red'>[FAIL]: ВЗЛОМ ПРОВАЛЕН! Код был: ${secretCode}</span>`);
+          endGame();
+        }
+
+        input.value = "";
+      }
+    }
+
+    function endGame() {
+      isPlaying = false;
+      document.getElementById('game-input').disabled = true;
+      document.getElementById('game-action-btn').innerText = "RESTART";
     }
   </script>
 </body>
