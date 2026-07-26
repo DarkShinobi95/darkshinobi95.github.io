@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DarkShinobi.ton | Profile</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: #000;
+      color: #00ff66;
+      font-family: 'Courier New', Courier, monospace;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    /* Фоновый холст «Матрицы» */
+    #matrix {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+
+    /* Главный контейнер-визитка */
+    .card {
+      position: relative;
+      z-index: 2;
+      background: rgba(0, 0, 0, 0.85);
+      border: 1px solid #00ff66;
+      border-radius: 16px;
+      padding: 30px 20px;
+      width: 90%;
+      max-width: 360px;
+      text-align: center;
+      box-shadow: 0 0 20px rgba(0, 255, 102, 0.25);
+      backdrop-filter: blur(5px);
+    }
+
+    /* Аватар */
+    .avatar {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      border: 2px solid #00ff66;
+      margin: 0 auto 15px auto;
+      box-shadow: 0 0 10px #00ff66;
+      object-fit: cover;
+    }
+
+    /* Заголовок / Домен */
+    h1 {
+      font-size: 22px;
+      letter-spacing: 2px;
+      text-shadow: 0 0 8px #00ff66;
+      margin-bottom: 5px;
+    }
+
+    /* Описание / Подзаголовок */
+    .bio {
+      font-size: 13px;
+      color: rgba(0, 255, 102, 0.8);
+      margin-bottom: 20px;
+      line-height: 1.4;
+    }
+
+    /* Список ссылок */
+    .links {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .btn {
+      display: block;
+      padding: 12px;
+      border: 1px solid #00ff66;
+      border-radius: 8px;
+      color: #00ff66;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 14px;
+      transition: all 0.2s ease;
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      background: #00ff66;
+      color: #000;
+      box-shadow: 0 0 15px #00ff66;
+    }
+
+    /* Кнопка скопировать кошелек */
+    .wallet-btn {
+      font-size: 11px;
+      opacity: 0.8;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="matrix"></canvas>
+
+  <div class="card">
+    <!-- Фото или заглушка -->
+    <img src="/logo.jpg" alt="Avatar" class="avatar">
+    
+    <h1>DarkShinobi.ton</h1>
+    <p class="bio">Холдер GRAM<br>КриптоГОЙ</p>
+
+    <div class="links">
+      <a href="https://t.me/darkshinobi_95" target="_blank" class="btn">💬 TELEGRAM</a>
+      <button class="btn wallet-btn" onclick="copyWallet()">📋 COPY TON ADDRESS</button>
+    </div>
+  </div>
+
+  <script>
+    // Матричный эффект
+    const canvas = document.getElementById('matrix');
+    const ctx = canvas.getContext('2d');
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const chars = '01';
+    const fontSize = 14;
+    const columns = Math.floor(canvas.width / fontSize);
+    const drops = Array(columns).fill(1);
+
+    function drawMatrix() {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.08)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = '#00ff66';
+      ctx.font = fontSize + 'px monospace';
+
+      for (let i = 0; i < drops.length; i++) {
+        const text = chars.charAt(Math.floor(Math.random() * chars.length));
+        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+          drops[i] = 0;
+        }
+        drops[i]++;
+      }
+    }
+
+    setInterval(drawMatrix, 40);
+
+    window.addEventListener('resize', () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    });
+
+    // Функция копирования кошелька
+    function copyWallet() {
+      const address = "UQDh_0Uk5b-omEv6G3g7jDAItuuwBDEabR8VlqAdBslZvLMj"; 
+      navigator.clipboard.writeText(address);
+      alert("TON адрес скопирован!");
+    }
+  </script>
+</body>
+</html>
